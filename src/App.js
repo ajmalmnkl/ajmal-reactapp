@@ -21,8 +21,8 @@ function App() {
 
     return (
         <div>
-            <h1>Please Fill Contact Form here</h1>
-        <h2>Modified by ajmal86</h2>
+            <h1>Please Fill Contact Form </h1>
+        <h2>Modified by ajmal86 here</h2>
             <form onSubmit={handleSubmit}>
                 <input name="name" placeholder="Name" onChange={handleChange} />
                 <input name="email" placeholder="Email" onChange={handleChange} />
