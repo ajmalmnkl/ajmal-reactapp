@@ -1,25 +1,37 @@
-name: Build Check
+name: Build and Auto-Merge
 
 on:
   pull_request:
-    branches:
-      - main
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
+      # Replace with your actual build steps
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: 18
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: Build React App
+      - name: Run build
         run: npm run build
+
+  enable-auto-merge:
+    needs: build
+    if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge for PR
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: squash # or merge/rebase
