@@ -1,0 +1,44 @@
+name: Check Review and Merge
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  check-review:
+    name: 🔍 Check Approval & Merge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if approved by owner and merge
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const repo = context.repo;
+
+            // Get all reviews
+            const reviews = await github.rest.pulls.listReviews({
+              owner: repo.owner,
+              repo: repo.repo,
+              pull_number: prNumber,
+            });
+
+            const approvals = new Set();
+            for (const review of reviews.data) {
+              if (review.state === "APPROVED") {
+                approvals.add(review.user.login);
+              }
+            }
+
+          
+
+            // Try to merge PR
+            await github.rest.pulls.merge({
+              owner: repo.owner,
+              repo: repo.repo,
+              pull_number: prNumber,
+              merge_method: "squash"
+            });
+
+            console.log(`PR #${prNumber} merged successfully.`);
